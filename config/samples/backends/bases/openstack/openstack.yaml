@@ -1,0 +1,79 @@
+#  Modified version from https://github.com/openstack-k8s-operators/openstack-operator/blob/master/config/samples/core_v1beta1_openstackcontrolplane.yaml
+apiVersion: core.openstack.org/v1beta1
+kind: OpenStackControlPlane
+metadata:
+  name: openstack
+spec:
+  secret: osp-secret
+  storageClass: local-storage
+  keystone:
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+  mariadb:
+    templates:
+      openstack:
+        storageRequest: 500M
+  rabbitmq:
+    templates:
+      rabbitmq:
+        replicas: 1
+      rabbitmq-cell1:
+        replicas: 1
+  galera:
+    enabled: false
+  glance:
+    enabled: false
+    template:
+      databaseInstance: openstack
+      storageClass: ""
+      storageRequest: 2G
+      glanceAPIInternal:
+        replicas: 1
+      glanceAPIExternal:
+        replicas: 1
+  cinder:
+    enabled: false
+    template:
+      cinderAPI:
+        replicas: 0
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-api:current-tripleo
+      cinderScheduler:
+        replicas: 0
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-scheduler:current-tripleo
+      cinderBackup:
+        replicas: 0
+        containerImage: quay.io/tripleozedcentos9/openstack-cinder-backup:current-tripleo
+      cinderVolumes:
+        volume1:
+          containerImage: quay.io/tripleozedcentos9/openstack-cinder-volume:current-tripleo
+          replicas: 0
+      databaseInstance: openstack
+      secret: osp-secret
+  manila:
+    enabled: true
+    template:
+      customServiceConfig: |
+        [DEFAULT]
+        debug = true
+      manilaAPI:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-manila-api:current-tripleo
+      manilaScheduler:
+        replicas: 1
+        containerImage: quay.io/tripleozedcentos9/openstack-manila-scheduler:current-tripleo
+  ovn:
+    enabled: false
+  ovs:
+    enabled: false
+  neutron:
+    enabled: false
+  placement:
+    enabled: false
+  nova:
+    enabled: false
+  ironic:
+    enabled: false
+    template:
+      ironicConductors:
+        - replicas: 0
